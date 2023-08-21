@@ -1,4 +1,4 @@
-/// Copyright (c) 2021 Razeware LLC
+/// Copyright (c) 2023 Razeware LLC
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -30,16 +30,10 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import SwiftUI
+import Foundation
+import CoreData
 
-@main
-struct RocketLaunchesApp: App {
-  let persistenceContainer = PersistenceController.shared
+@objc(RocketLaunch)
+public class RocketLaunch: NSManagedObject {
   
-  var body: some Scene {
-    WindowGroup {
-      ContentView()
-        .environment(\.managedObjectContext, persistenceContainer.container.viewContext)
-    }
-  }
 }

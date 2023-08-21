@@ -34,13 +34,35 @@ import SwiftUI
 
 struct LaunchesView: View {
   @State var isShowingCreateModal = false
+  let launchesFetchRequest = RocketLaunch.unViewedLaunchedFetchRequest()
+  var launches: FetchedResults<RocketLaunch> {
+    launchesFetchRequest.wrappedValue
+  }
+  
+  // SwiftUI provides an alternative to retrieve fetched results
+  // through a property wrapper.
+  // @FetchRequest(entity: RocketLaunch.entity(), sortDescriptors: [])
+  // var launches: FetchedResults<RocketLaunch>
+  
+  // SortDescriptor type lets us define sort descriptors outside of the normal fetch request declaration.
+  let sortTypes = [
+    (name: "Name", descriptors: [SortDescriptor(\RocketLaunch.name, order: .forward)]),
+    (name: "LaunchDate", descriptors: [SortDescriptor(\RocketLaunch.launchDate, order: .forward)]),
+  ]
+  
+  @State var activeSortIndex = 0
 
   var body: some View {
     VStack {
       List {
         Section {
-          ForEach(1...10, id: \.self) { _ in
-            Text("Test")
+          ForEach(launches) { launch in
+            HStack {
+              NavigationLink(destination: LaunchDetailView(launch: launch)) {
+                LaunchStatusView(isViewed: launch.isViewed)
+                Text(launch.name)                
+              }
+            }
           }
         }
       }
@@ -52,12 +74,34 @@ struct LaunchesView: View {
       .padding(.leading)
     }
     .navigationBarTitle(Text("Launches"))
+    .onChange(of: activeSortIndex) { _ in
+      launches.sortDescriptors = sortTypes[activeSortIndex].descriptors
+    }
+    .toolbar {
+      Menu {
+        Picker(
+          selection: $activeSortIndex,
+          content: {
+            ForEach(0..<sortTypes.count, id: \.self) { index in
+              let sortType = sortTypes[index]
+              Text(sortType.name)
+            }
+          },
+          label: {}
+        )
+      } label: {
+        Image(systemName: "line.3.horizontal.decrease.circle.fill")
+      }
+    }
   }
 }
 
 struct LaunchesView_Previews: PreviewProvider {
   static var previews: some View {
-    LaunchesView()
+    let context = PersistenceController.preview.container.viewContext
+    let newLaunch = RocketLaunch(context: context)
+    newLaunch.name = "Preview Launch"
+    return LaunchesView()
   }
 }
 

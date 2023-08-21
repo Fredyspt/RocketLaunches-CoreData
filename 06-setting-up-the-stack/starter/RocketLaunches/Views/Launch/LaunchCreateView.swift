@@ -31,18 +31,20 @@
 /// THE SOFTWARE.
 
 import SwiftUI
+import CoreData
 
 struct LaunchCreateView: View {
   // MARK: - Environment -
   @Environment(\.dismiss) var dismiss
-
+  @Environment(\.managedObjectContext) var viewContext
+  
   // MARK: - State -
   @State var name: String = ""
   @State var notes: String = ""
   @State var isViewed = false
   @State var launchDate = Date()
   @State var launchpad: String = ""
-
+  
   var body: some View {
     NavigationView {
       Form {
@@ -59,13 +61,24 @@ struct LaunchCreateView: View {
       }
       .background(Color(.systemGroupedBackground))
       .navigationBarTitle(Text("Create Event"), displayMode: .inline)
-      .navigationBarItems(trailing:
-        Button(action: {
-          dismiss()
-        }, label: {
-          Text("Save")
-            .fontWeight(.bold)
-        })
+      .navigationBarItems(
+        trailing:
+          Button(
+            action: {
+              RocketLaunch.createWith(
+                name: name,
+                launchDate: launchDate,
+                isViewed: isViewed,
+                launchPad: launchpad,
+                notes: notes,
+                using: viewContext
+              )
+              dismiss()
+            }, label: {
+              Text("Save")
+                .fontWeight(.bold)
+            }
+          )
       )
     }
   }

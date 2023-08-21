@@ -33,15 +33,55 @@
 import SwiftUI
 
 struct LaunchDetailView: View {
+  @Environment(\.managedObjectContext) var viewContext
+  let launch: RocketLaunch
+  let launchName: String?
+  let launchNotes: String?
+  let launchDate: Date?
+  let isViewed: Bool?
+  
+  init(launch: RocketLaunch) {
+    self.launch = launch
+    self.launchName = launch.name
+    self.launchNotes = launch.notes
+    self.launchDate = launch.launchDate
+    self.isViewed = launch.isViewed
+  }
+  
   var body: some View {
-    Text("Launch details go here")
-    .navigationTitle("Sample Launch")
+    Form {
+      Section("Notes") {
+        Text(launchNotes ?? "No notes")
+      }
+      
+      if let launchDate {
+        Section("Launch Date") {
+          Text(launchDate.formatted())
+        }
+      }
+      
+      Section {
+        Button("Mark as Viewed") {
+          self.launch.isViewed = true
+          
+          do {
+            try viewContext.save()
+          } catch {
+            print("Error marking launch as viewed \(error.localizedDescription)")
+          }
+        }
+      }
+    }
+    .navigationTitle(launchName ?? "Unnamed Launch")
     .background(Color(.systemGroupedBackground))
   }
 }
 
 struct LaunchDetailView_Previews: PreviewProvider {
   static var previews: some View {
-    LaunchDetailView()
+    let context = PersistenceController.preview.container.viewContext
+    let dummyLaunch = RocketLaunch(context: context)
+    dummyLaunch.name = "Preview Launch"
+    return LaunchDetailView(launch: dummyLaunch)
   }
 }
