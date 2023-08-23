@@ -34,15 +34,7 @@ import SwiftUI
 
 struct LaunchesView: View {
   @State var isShowingCreateModal = false
-  let launchesFetchRequest = RocketLaunch.unViewedLaunchedFetchRequest()
-  var launches: FetchedResults<RocketLaunch> {
-    launchesFetchRequest.wrappedValue
-  }
-  
-  // SwiftUI provides an alternative to retrieve fetched results
-  // through a property wrapper.
-  // @FetchRequest(entity: RocketLaunch.entity(), sortDescriptors: [])
-  // var launches: FetchedResults<RocketLaunch>
+  @State var activeSortIndex = 0
   
   // SortDescriptor type lets us define sort descriptors outside of the normal fetch request declaration.
   let sortTypes = [
@@ -50,13 +42,23 @@ struct LaunchesView: View {
     (name: "LaunchDate", descriptors: [SortDescriptor(\RocketLaunch.launchDate, order: .forward)]),
   ]
   
-  @State var activeSortIndex = 0
+  // SwiftUI provides an alternative to retrieve fetched results
+  // through a property wrapper. See `launchLists` at (ListView)[x-source-tag://ListView]
+  // @FetchRequest(entity: RocketLaunch.entity(), sortDescriptors: [])
+  // var launches: FetchedResults<RocketLaunch>
+  let launchesFetchRequest = RocketLaunch.unViewedLaunchedFetchRequest()
+  var launches: FetchedResults<RocketLaunch> {
+    launchesFetchRequest.wrappedValue
+  }
+  
+  // We need this to fetch all rocket launches that belong to this list
+  let launchList: RocketLaunchList
 
   var body: some View {
     VStack {
       List {
         Section {
-          ForEach(launches) { launch in
+          ForEach(launchList.launches) { launch in
             HStack {
               NavigationLink(destination: LaunchDetailView(launch: launch)) {
                 LaunchStatusView(isViewed: launch.isViewed)
@@ -67,8 +69,9 @@ struct LaunchesView: View {
         }
       }
       .background(Color.white)
+      
       HStack {
-        NewLaunchButton(isShowingCreateModal: $isShowingCreateModal)
+        NewLaunchButton(isShowingCreateModal: $isShowingCreateModal, launchList: launchList)
         Spacer()
       }
       .padding(.leading)
@@ -99,14 +102,15 @@ struct LaunchesView: View {
 struct LaunchesView_Previews: PreviewProvider {
   static var previews: some View {
     let context = PersistenceController.preview.container.viewContext
-    let newLaunch = RocketLaunch(context: context)
-    newLaunch.name = "Preview Launch"
-    return LaunchesView()
+    let newLaunchList = RocketLaunchList(context: context)
+    newLaunchList.title = "Preview List"
+    return LaunchesView(launchList: newLaunchList).environment(\.managedObjectContext, context)
   }
 }
 
 struct NewLaunchButton: View {
   @Binding var isShowingCreateModal: Bool
+  let launchList: RocketLaunchList
 
   var body: some View {
     Button(
@@ -119,7 +123,7 @@ struct NewLaunchButton: View {
           .foregroundColor(.red)
       })
       .sheet(isPresented: $isShowingCreateModal) {
-        LaunchCreateView()
+        LaunchCreateView(launchList: launchList)
       }
   }
 }

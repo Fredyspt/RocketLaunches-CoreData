@@ -40,6 +40,7 @@ extension RocketLaunch {
   @NSManaged public var isViewed: Bool
   @NSManaged public var launchPad: String?
   @NSManaged public var notes: String?
+  @NSManaged public var list: RocketLaunchList
   
   static func createWith(
     name: String,
@@ -47,6 +48,7 @@ extension RocketLaunch {
     isViewed: Bool,
     launchPad: String?,
     notes: String?,
+    in list: RocketLaunchList,
     using managedObjectContext: NSManagedObjectContext
   ) {
     let launch = RocketLaunch(context: managedObjectContext)
@@ -55,6 +57,7 @@ extension RocketLaunch {
     launch.isViewed = isViewed
     launch.launchDate = launchDate
     launch.launchPad = launchPad
+    launch.list = list
     
     do {
       try managedObjectContext.save()
@@ -88,7 +91,7 @@ extension RocketLaunch {
   static func unViewedLaunchedFetchRequest() -> FetchRequest<RocketLaunch> {
     let nameSortDescriptor = NSSortDescriptor(key: "name", ascending: true)
     let launchDateSortDescriptor = NSSortDescriptor(key: "launchDate", ascending: true)
-    let isViewedPredicate = NSPredicate(format: "%K == %@", "isViewed", NSNumber(value: false)) // %K replaces a keypath on the fetched result
+    let isViewedPredicate = NSPredicate(format: "%K == %@", "isViewed", NSNumber(value: false)) // %K replaces a keypath on the fetched result, whilst %@ substitues an object value type, hence needing to wrap the boolean in an NSNumber object type.
     return FetchRequest(entity: RocketLaunch.entity(), sortDescriptors: [nameSortDescriptor, launchDateSortDescriptor], predicate: isViewedPredicate)
   }
 }

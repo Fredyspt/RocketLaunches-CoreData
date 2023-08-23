@@ -1,4 +1,4 @@
-/// Copyright (c) 2022 Razeware LLC
+/// Copyright (c) 2023 Razeware LLC
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -31,67 +31,53 @@
 /// THE SOFTWARE.
 
 import SwiftUI
-import CoreData
 
-struct LaunchCreateView: View {
-  // MARK: - Environment -
-  @Environment(\.dismiss) var dismiss
+struct ListCreateView: View {
   @Environment(\.managedObjectContext) var viewContext
+  @Environment(\.dismiss) var dismiss
   
-  // MARK: - State -
-  @State var name: String = ""
-  @State var notes: String = ""
-  @State var isViewed = false
-  @State var launchDate = Date()
-  @State var launchpad: String = ""
-  
-  let launchList: RocketLaunchList
+  @State var text: String = ""
   
   var body: some View {
     NavigationView {
-      Form {
-        Section {
-          TextField("Title", text: $name)
-          TextField("Launch Pad", text: $launchpad)
-          TextField("Notes", text: $notes)
+      VStack(alignment: .leading) {
+        HStack {
+          Spacer()
+          CircularImageView(color: .red)
+          Spacer()
         }
-        Section {
-          DatePicker(selection: $launchDate, displayedComponents: .date) {
-            Text("Date")
-          }
+        .padding([.top, .bottom])
+        HStack {
+          Text("Enter a list title")
+          Spacer()
         }
-      }
-      .background(Color(.systemGroupedBackground))
-      .navigationBarTitle(Text("Create Event"), displayMode: .inline)
-      .navigationBarItems(
-        trailing:
-          Button(
-            action: {
-              RocketLaunch.createWith(
-                name: name,
-                launchDate: launchDate,
-                isViewed: isViewed,
-                launchPad: launchpad,
-                notes: notes,
-                in: launchList,
-                using: viewContext
-              )
-              dismiss()
-            }, label: {
-              Text("Save")
-                .fontWeight(.bold)
-            }
+        .padding([.leading, .trailing])
+        TextField("Title", text: $text)
+          .padding()
+          .background(
+            Color(red: 231 / 255, green: 234 / 255.0, blue: 237 / 255.0)
           )
-      )
+          .cornerRadius(10)
+          .padding()
+        Spacer()
+      }
+      .navigationBarTitle(Text("Create Launch"), displayMode: .inline)
+      .navigationBarItems(
+        leading: Button("Close") {
+          dismiss()
+        },
+        trailing: Button("Save") {
+          if !self.text.isEmpty {
+            RocketLaunchList.createWith(title: text, in: viewContext)
+            dismiss()
+          }
+        })
     }
   }
 }
 
-struct LaunchCreateView_Previews: PreviewProvider {
+struct ListCreateView_Previews: PreviewProvider {
   static var previews: some View {
-    let context = PersistenceController.preview.container.viewContext
-    let newLaunchList = RocketLaunchList(context: context)
-    newLaunchList.title = "Preview List"
-    return LaunchCreateView(launchList: newLaunchList).environment(\.managedObjectContext, context)
+    ListCreateView(text: "")
   }
 }

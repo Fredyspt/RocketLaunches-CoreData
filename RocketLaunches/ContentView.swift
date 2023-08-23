@@ -35,12 +35,23 @@ import CoreData
 
 struct ContentView: View {
   @State var isShowingListModal = false
-
+  
   var body: some View {
     NavigationView {
-      LaunchesView()
+      ListView()
         .navigationBarTitle(Text("Launches"))
-        .navigationBarItems(leading: EditButton())
+        .navigationBarItems(
+          trailing:
+            HStack {
+              Button(
+                action: { self.isShowingListModal.toggle() },
+                label: { Image(systemName: "plus") }
+              )
+            }
+            .sheet(isPresented: $isShowingListModal) {
+              ListCreateView(text: "")
+            }
+        )
     }
   }
 }
