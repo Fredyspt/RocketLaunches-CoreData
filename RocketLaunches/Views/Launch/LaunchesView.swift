@@ -46,19 +46,24 @@ struct LaunchesView: View {
   // through a property wrapper. See `launchLists` at (ListView)[x-source-tag://ListView]
   // @FetchRequest(entity: RocketLaunch.entity(), sortDescriptors: [])
   // var launches: FetchedResults<RocketLaunch>
-  let launchesFetchRequest = RocketLaunch.unViewedLaunchedFetchRequest()
+  let launchesFetchRequest: FetchRequest<RocketLaunch>
   var launches: FetchedResults<RocketLaunch> {
     launchesFetchRequest.wrappedValue
   }
   
   // We need this to fetch all rocket launches that belong to this list
   let launchList: RocketLaunchList
+  
+  init(launchList: RocketLaunchList) {
+    self.launchList = launchList
+    launchesFetchRequest = RocketLaunch.launches(in: launchList)
+  }
 
   var body: some View {
     VStack {
       List {
         Section {
-          ForEach(launchList.launches) { launch in
+          ForEach(launches) { launch in
             HStack {
               NavigationLink(destination: LaunchDetailView(launch: launch)) {
                 LaunchStatusView(isViewed: launch.isViewed)

@@ -94,6 +94,19 @@ extension RocketLaunch {
     let isViewedPredicate = NSPredicate(format: "%K == %@", "isViewed", NSNumber(value: false)) // %K replaces a keypath on the fetched result, whilst %@ substitues an object value type, hence needing to wrap the boolean in an NSNumber object type.
     return FetchRequest(entity: RocketLaunch.entity(), sortDescriptors: [nameSortDescriptor, launchDateSortDescriptor], predicate: isViewedPredicate)
   }
+  
+  static func launches(in list: RocketLaunchList) -> FetchRequest<RocketLaunch> {
+    let nameSortDescriptor = NSSortDescriptor(key: "name", ascending: true)
+    let launchDateSortDescriptor = NSSortDescriptor(key: "launchDate", ascending: true)
+    let listPredicate = NSPredicate(format: "%K == %@", "list.title", list.title!)
+    let isViewedPredicate = NSPredicate(format: "%K == %@", "isViewed", NSNumber(value: false))
+    let compoundedPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [listPredicate, isViewedPredicate])
+    return FetchRequest<RocketLaunch>(
+      entity: RocketLaunch.entity(),
+      sortDescriptors: [nameSortDescriptor, launchDateSortDescriptor],
+      predicate: compoundedPredicate
+    )
+  }
 }
 
 extension RocketLaunch: Identifiable { }
