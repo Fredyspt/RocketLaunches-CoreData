@@ -71,6 +71,14 @@ struct LaunchDetailView: View {
           }
         }
       }
+
+      Section("Tags") {
+        List {
+          ForEach(Array(launch.tags)) { tag in
+            Text(tag.title ?? "")
+          }
+        }
+      }
     }
     .navigationTitle(launchName ?? "Unnamed Launch")
     .background(Color(.systemGroupedBackground))
@@ -82,6 +90,9 @@ struct LaunchDetailView_Previews: PreviewProvider {
     let context = PersistenceController.preview.container.viewContext
     let dummyLaunch = RocketLaunch(context: context)
     dummyLaunch.name = "Preview Launch"
-    return LaunchDetailView(launch: dummyLaunch)
+    dummyLaunch.launchDate = Date()
+    dummyLaunch.isViewed = false
+    dummyLaunch.notes = "Some notes"
+    return LaunchDetailView(launch: dummyLaunch).environment(\.managedObjectContext, context)
   }
 }

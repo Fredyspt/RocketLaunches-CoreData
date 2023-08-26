@@ -61,7 +61,7 @@ struct ListCreateView: View {
           .padding()
         Spacer()
       }
-      .navigationBarTitle(Text("Create Launch"), displayMode: .inline)
+      .navigationBarTitle(Text("Create Launch List"), displayMode: .inline)
       .navigationBarItems(
         leading: Button("Close") {
           dismiss()

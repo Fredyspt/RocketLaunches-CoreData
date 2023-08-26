@@ -49,7 +49,7 @@ struct ContentView: View {
               )
             }
             .sheet(isPresented: $isShowingListModal) {
-              ListCreateView(text: "")
+              ListCreateView()
             }
         )
     }

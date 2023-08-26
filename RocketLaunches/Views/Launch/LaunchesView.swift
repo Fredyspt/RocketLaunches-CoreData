@@ -34,6 +34,7 @@ import SwiftUI
 
 struct LaunchesView: View {
   @State var isShowingCreateModal = false
+  @State var isShowingTagsModal = false
   @State var activeSortIndex = 0
   
   // SortDescriptor type lets us define sort descriptors outside of the normal fetch request declaration.
@@ -53,6 +54,19 @@ struct LaunchesView: View {
   
   // We need this to fetch all rocket launches that belong to this list
   let launchList: RocketLaunchList
+  
+  var tags: Array<RocketLaunchTag> {
+    let tagsSet = launchList
+      .launches
+      .compactMap{ $0.tags }
+      .reduce(Set<RocketLaunchTag>()) { accumulatedTags, tags in
+        var result = accumulatedTags
+        result.formUnion(tags)
+        return result
+      }
+    
+    return Array(tagsSet)
+  }
   
   init(launchList: RocketLaunchList) {
     self.launchList = launchList
@@ -101,22 +115,23 @@ struct LaunchesView: View {
         Image(systemName: "line.3.horizontal.decrease.circle.fill")
       }
     }
-  }
-}
-
-struct LaunchesView_Previews: PreviewProvider {
-  static var previews: some View {
-    let context = PersistenceController.preview.container.viewContext
-    let newLaunchList = RocketLaunchList(context: context)
-    newLaunchList.title = "Preview List"
-    return LaunchesView(launchList: newLaunchList).environment(\.managedObjectContext, context)
+    .navigationBarItems(
+      trailing: Button {
+        isShowingTagsModal = true
+      } label: {
+        Text("Tags")
+      }
+    )
+    .sheet(isPresented: $isShowingTagsModal) {
+      TagsView(tags: tags)
+    }
   }
 }
 
 struct NewLaunchButton: View {
   @Binding var isShowingCreateModal: Bool
   let launchList: RocketLaunchList
-
+  
   var body: some View {
     Button(
       action: { self.isShowingCreateModal.toggle() },
@@ -127,8 +142,30 @@ struct NewLaunchButton: View {
           .font(.headline)
           .foregroundColor(.red)
       })
-      .sheet(isPresented: $isShowingCreateModal) {
-        LaunchCreateView(launchList: launchList)
-      }
+    .sheet(isPresented: $isShowingCreateModal) {
+      LaunchCreateView(launchList: launchList)
+    }
   }
 }
+
+struct LaunchesView_Previews: PreviewProvider {
+  static var previews: some View {
+    let context = PersistenceController.preview.container.viewContext
+    let newLaunchList = RocketLaunchList(context: context)
+    newLaunchList.title = "Preview List"
+    
+    RocketLaunch.createWith(
+      name: "Dummy Launch",
+      launchDate: Date(),
+      isViewed: false,
+      launchPad: nil,
+      notes: nil,
+      tags: [],
+      in: newLaunchList,
+      using: context
+    )
+    
+    return LaunchesView(launchList: newLaunchList).environment(\.managedObjectContext, context)
+  }
+}
+

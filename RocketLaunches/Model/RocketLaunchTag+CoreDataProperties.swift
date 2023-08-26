@@ -51,11 +51,7 @@ extension RocketLaunchTag {
     request.predicate = predicate
     let results = try? managedObjectContext.fetch(request)
     
-    if let tag = results?.first {
-      return tag
-    } else {
-      return createWith(title: title, in: managedObjectContext)
-    }
+    return results?.first ?? createWith(title: title, in: managedObjectContext)
   }
   
   static func createWith(title: String, in managedObjectContext: NSManagedObjectContext) -> RocketLaunchTag {
