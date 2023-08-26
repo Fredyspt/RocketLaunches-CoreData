@@ -40,6 +40,7 @@ extension RocketLaunch {
   @NSManaged public var isViewed: Bool
   @NSManaged public var launchPad: String?
   @NSManaged public var notes: String?
+  @NSManaged public var tags: Set<RocketLaunchTag>
   @NSManaged public var list: RocketLaunchList
   
   static func createWith(
@@ -48,12 +49,14 @@ extension RocketLaunch {
     isViewed: Bool,
     launchPad: String?,
     notes: String?,
+    tags: Set<RocketLaunchTag>,
     in list: RocketLaunchList,
     using managedObjectContext: NSManagedObjectContext
   ) {
     let launch = RocketLaunch(context: managedObjectContext)
     launch.name = name
     launch.notes = notes
+    launch.tags = tags
     launch.isViewed = isViewed
     launch.launchDate = launchDate
     launch.launchPad = launchPad

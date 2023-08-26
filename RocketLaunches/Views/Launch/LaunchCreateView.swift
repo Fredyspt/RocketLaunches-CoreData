@@ -44,6 +44,7 @@ struct LaunchCreateView: View {
   @State var isViewed = false
   @State var launchDate = Date()
   @State var launchpad: String = ""
+  @State var tags = ""
   
   let launchList: RocketLaunchList
   
@@ -55,6 +56,11 @@ struct LaunchCreateView: View {
           TextField("Launch Pad", text: $launchpad)
           TextField("Notes", text: $notes)
         }
+        
+        Section {
+          TextField("Tags", text: $tags)
+        }
+        
         Section {
           DatePicker(selection: $launchDate, displayedComponents: .date) {
             Text("Date")
@@ -67,12 +73,24 @@ struct LaunchCreateView: View {
         trailing:
           Button(
             action: {
+              let tags = Set(
+                tags
+                  .split(separator: ",")
+                  .map {
+                    RocketLaunchTag.fetchOrCreateWith(
+                      title: String($0),
+                      in: viewContext
+                    )
+                  }
+              )
+              
               RocketLaunch.createWith(
                 name: name,
                 launchDate: launchDate,
                 isViewed: isViewed,
                 launchPad: launchpad,
                 notes: notes,
+                tags: tags,
                 in: launchList,
                 using: viewContext
               )

@@ -7,9 +7,14 @@
         <attribute name="name" attributeType="String"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
         <relationship name="list" maxCount="1" deletionRule="Nullify" destinationEntity="RocketLaunchList" inverseName="launches" inverseEntity="RocketLaunchList"/>
+        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RocketLaunchTag" inverseName="taggedLaunches" inverseEntity="RocketLaunchTag"/>
     </entity>
     <entity name="RocketLaunchList" representedClassName="RocketLaunchList" syncable="YES">
         <attribute name="title" attributeType="String"/>
         <relationship name="launches" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="RocketLaunch" inverseName="list" inverseEntity="RocketLaunch"/>
+    </entity>
+    <entity name="RocketLaunchTag" representedClassName="RocketLaunchTag" syncable="YES">
+        <attribute name="title" attributeType="String"/>
+        <relationship name="taggedLaunches" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RocketLaunch" inverseName="tags" inverseEntity="RocketLaunch"/>
     </entity>
 </model>
