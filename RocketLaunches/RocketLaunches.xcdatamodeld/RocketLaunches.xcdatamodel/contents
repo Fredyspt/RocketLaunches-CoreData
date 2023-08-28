@@ -14,6 +14,7 @@
         <relationship name="launches" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="RocketLaunch" inverseName="list" inverseEntity="RocketLaunch"/>
     </entity>
     <entity name="RocketLaunchTag" representedClassName="RocketLaunchTag" syncable="YES">
+        <attribute name="launchCount" transient="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title" attributeType="String"/>
         <relationship name="taggedLaunches" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RocketLaunch" inverseName="tags" inverseEntity="RocketLaunch"/>
     </entity>
