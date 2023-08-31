@@ -27,6 +27,7 @@
 		48C17E392A9D04260022DE95 /* SpaceXLaunchJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C17E382A9D04260022DE95 /* SpaceXLaunchJSON.swift */; };
 		48C17E3B2A9D04D50022DE95 /* SpaceXLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C17E3A2A9D04D50022DE95 /* SpaceXLinks.swift */; };
 		48C17E3E2A9D055F0022DE95 /* SpaceXAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C17E3D2A9D055F0022DE95 /* SpaceXAPI.swift */; };
+		48C17E402A9FA0640022DE95 /* SpaceXLaunchRelationship.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C17E3F2A9FA0640022DE95 /* SpaceXLaunchRelationship.swift */; };
 		AE1D5CE827C2A1120033125A /* LaunchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1D5CE727C2A1120033125A /* LaunchDetailView.swift */; };
 		AE5BF31627C47A17009B0282 /* RocketLaunchesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE5BF31527C47A17009B0282 /* RocketLaunchesTests.swift */; };
 		AEF7FB8227C1856F000CBF46 /* LaunchesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF7FB8127C1856F000CBF46 /* LaunchesView.swift */; };
@@ -67,6 +68,7 @@
 		48C17E382A9D04260022DE95 /* SpaceXLaunchJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceXLaunchJSON.swift; sourceTree = "<group>"; };
 		48C17E3A2A9D04D50022DE95 /* SpaceXLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceXLinks.swift; sourceTree = "<group>"; };
 		48C17E3D2A9D055F0022DE95 /* SpaceXAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceXAPI.swift; sourceTree = "<group>"; };
+		48C17E3F2A9FA0640022DE95 /* SpaceXLaunchRelationship.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceXLaunchRelationship.swift; sourceTree = "<group>"; };
 		AE1D5CE727C2A1120033125A /* LaunchDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchDetailView.swift; sourceTree = "<group>"; };
 		AE5BF31327C47A17009B0282 /* RocketLaunchesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RocketLaunchesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE5BF31527C47A17009B0282 /* RocketLaunchesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RocketLaunchesTests.swift; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 				48C17E362A9D03760022DE95 /* SpaceXFairingsJSON.swift */,
 				48C17E382A9D04260022DE95 /* SpaceXLaunchJSON.swift */,
 				48C17E3A2A9D04D50022DE95 /* SpaceXLinks.swift */,
+				48C17E3F2A9FA0640022DE95 /* SpaceXLaunchRelationship.swift */,
 			);
 			path = SpaceX;
 			sourceTree = "<group>";
@@ -354,6 +357,7 @@
 				48C17E2B2A966A500022DE95 /* ListCreateView.swift in Sources */,
 				48C17E272A93C54A0022DE95 /* RocketLaunchList+CoreDataClass.swift in Sources */,
 				1839F4B025190F2A00BB00F1 /* RocketLaunchesApp.swift in Sources */,
+				48C17E402A9FA0640022DE95 /* SpaceXLaunchRelationship.swift in Sources */,
 				48C17E302A97C0A40022DE95 /* RocketLaunchTag+CoreDataClass.swift in Sources */,
 				48C17E2D2A966A9A0022DE95 /* ListView.swift in Sources */,
 				AE1D5CE827C2A1120033125A /* LaunchDetailView.swift in Sources */,
