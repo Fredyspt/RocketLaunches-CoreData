@@ -50,7 +50,7 @@ struct PersistenceController {
       newLaunch.name = "Launch \(i + 1)"
       let newList = RocketLaunchList(context: viewContext)
       newList.title = "Sample List"
-      newLaunch.list = newList
+      newLaunch.addToList(newList)
     }
     
         let launchLinks = SpaceXLinks(context: viewContext)
@@ -124,28 +124,28 @@ struct PersistenceController {
   static func fetchSpaceXLaunches() async throws {
     let launches = try await SpaceXAPI.getAllLaunches()
     do {
-      try PersistenceController.shared.importLaunches(from: launches, to: "All")
+      try await PersistenceController.shared.importLaunches(from: launches, to: "All")
     } catch {
       print("error is \(error)")
     }
     
     let upcomingLaunches = try await SpaceXAPI.getUpcomingLaunches()
     do {
-      try PersistenceController.shared.importLaunches(from: upcomingLaunches, to: "Upcoming")
+      try await PersistenceController.shared.importLaunches(from: upcomingLaunches, to: "Upcoming")
     } catch {
       print("error is \(error)")
     }
     
     let pastLaunches = try await SpaceXAPI.getPastLaunches()
     do {
-      try PersistenceController.shared.importLaunches(from: pastLaunches, to: "Past")
+      try await PersistenceController.shared.importLaunches(from: pastLaunches, to: "Past")
     } catch {
       print("error is \(error)")
     }
     
     let latestLaunches = try await SpaceXAPI.getLatestLaunch()
     do {
-      try PersistenceController.shared.importLaunches(from: latestLaunches, to: "Latest")
+      try await PersistenceController.shared.importLaunches(from: latestLaunches, to: "Latest")
     } catch {
       print("error is \(error)")
     }
@@ -200,100 +200,120 @@ struct PersistenceController {
     return first
   }
   
-  func importLaunches(from launchCollection: [SpaceXLaunchJSON], to listName: String) throws {
-    let taskContext = container.viewContext
+  private func newTaskContext() -> NSManagedObjectContext {
+    let taskContext = container.newBackgroundContext()
+    taskContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+    return taskContext
+  }
+  
+  func importLaunches(from launchCollection: [SpaceXLaunchJSON], to listName: String) async throws {
+    let taskContext = newTaskContext()
+    taskContext.name = "importContext"
+    taskContext.transactionAuthor = "importLaunches"
     
     // 1. Fetch list that matches the given list name
     var list: SpaceXLaunchList!
-    let fetchRequest = SpaceXLaunchList.fetchRequest()
-    fetchRequest.predicate = NSPredicate(format: "title == %@", listName)
-    let results = try taskContext.fetch(fetchRequest)
-    if let fetchedList = results.first {
-      list = fetchedList
+    try taskContext.performAndWait {
+      let fetchRequest = SpaceXLaunchList.fetchRequest()
+      fetchRequest.predicate = NSPredicate(format: "title == %@", listName)
+      let results = try taskContext.fetch(fetchRequest)
+      if let fetchedList = results.first {
+        list = fetchedList
+      }
     }
     
-    // 2. Batch insert SpaceXLaunches
-    let launchesBatchInsertRequest = createBatchInsertLaunchRequest(from: launchCollection)
-    if let storeResult = try? taskContext.execute(launchesBatchInsertRequest),
-       let batchInsertResult = storeResult as? NSBatchInsertResult,
-       let success = batchInsertResult.result as? Bool,
-       success {
-      return
-    } else {
+    // 2. Batch insert SpaceXLaunches and wait for the operation to finish before we
+    // establish the relationships
+    try taskContext.performAndWait {
+      let launchesBatchInsertRequest = createBatchInsertLaunchRequest(from: launchCollection)
+      if let storeResult = try? taskContext.execute(launchesBatchInsertRequest),
+         let batchInsertResult = storeResult as? NSBatchInsertResult,
+         let success = batchInsertResult.result as? Bool,
+         success {
+            return
+         }
+      
       throw LaunchError.batchInsertError
     }
     
     // 3. Batch insert SpaceXFairings associated with the SpaceXLaunches
     let fairings = launchCollection.map { SpaceXLaunchRelationship(launchId: $0.id, relatedObject: $0.fairings) }
-    let fairingsBatchInsertRequest = createBatchInsertRelationshipRequest(from: fairings, for: SpaceXFairings.self)
-    if let storeResult = try? taskContext.execute(fairingsBatchInsertRequest),
-       let batchInsertResult = storeResult as? NSBatchInsertResult,
-       let success = batchInsertResult.result as? Bool,
-       success {
-      return
-    } else {
+    try await taskContext.perform {
+      let fairingsBatchInsertRequest = createBatchInsertRelationshipRequest(from: fairings, for: SpaceXFairings.self)
+      if let storeResult = try? taskContext.execute(fairingsBatchInsertRequest),
+         let batchInsertResult = storeResult as? NSBatchInsertResult,
+         let success = batchInsertResult.result as? Bool,
+         success {
+            return
+         }
+      
       throw LaunchError.batchInsertError
     }
     
     // 3.1 Establish relationship between saved fairings and SpaceXLaunch
-    for relationship in fairings {
-      guard let fairing = relationship.relatedObject as? SpaceXFairingsJSON else { continue }
+    try await taskContext.perform {
+      for relationship in fairings {
+        guard let fairing = relationship.relatedObject as? SpaceXFairingsJSON else { continue }
+        
+        let fairingsFetchRequest = SpaceXFairings.fetchRequest()
+        fairingsFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [fairing.id])
+        
+        let launchesFetchRequest = SpaceXLaunch.fetchRequest()
+        launchesFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [relationship.launchId])
+        
+        let fetchedFairings = try taskContext.fetch(fairingsFetchRequest)
+        let fetchedLaunches = try taskContext.fetch(launchesFetchRequest)
+        
+        guard !fetchedFairings.isEmpty,
+              !fetchedLaunches.isEmpty
+        else { continue }
+        
+        let matchedFairing = fetchedFairings[0]
+        let matchedLaunch = fetchedLaunches[0]
+        matchedFairing.launch = matchedLaunch
+      }
       
-      let fairingsFetchRequest = SpaceXFairings.fetchRequest()
-      fairingsFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [fairing.id])
-      
-      let launchesFetchRequest = SpaceXLaunch.fetchRequest()
-      launchesFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [relationship.launchId])
-      
-      let fetchedFairings = try taskContext.fetch(fairingsFetchRequest)
-      let fetchedLaunches = try taskContext.fetch(launchesFetchRequest)
-      
-      guard !fetchedFairings.isEmpty,
-            !fetchedLaunches.isEmpty
-      else { continue }
-      
-      let matchedFairing = fetchedFairings[0]
-      let matchedLaunch = fetchedLaunches[0]
-      matchedFairing.launch = matchedLaunch
+      try taskContext.save()
     }
-    
-    try taskContext.save()
     
     // 4. Batch insert SpaceXLinks associates with the SpaceXLaunches
     let links = launchCollection.map { SpaceXLaunchRelationship(launchId: $0.id, relatedObject: $0.links) }
-    let linksBatchInsertRequest = createBatchInsertRelationshipRequest(from: links, for: SpaceXLinks.self)
-    if let storeResult = try? taskContext.execute(linksBatchInsertRequest),
-       let batchInsertResult = storeResult as? NSBatchInsertResult,
-       let success = batchInsertResult.result as? Bool,
-       success {
-      return
-    } else {
+    try await taskContext.perform {
+      let linksBatchInsertRequest = createBatchInsertRelationshipRequest(from: links, for: SpaceXLinks.self)
+      if let storeResult = try? taskContext.execute(linksBatchInsertRequest),
+         let batchInsertResult = storeResult as? NSBatchInsertResult,
+         let success = batchInsertResult.result as? Bool,
+         success {
+            return
+         }
+      
       throw LaunchError.batchInsertError
     }
     
     // 4.1 Establish the relationship between saved links and launches
-    for relationship in links {
-      guard let link = relationship.relatedObject as? SpaceXLinksJSON else { continue }
-      
-      let linksFetchRequest = SpaceXLinks.fetchRequest()
-      linksFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [link.id])
-      
-      let launchesFetchRequest = SpaceXLaunch.fetchRequest()
-      launchesFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [relationship.launchId])
-      
-      let fetchedLinks = try taskContext.fetch(linksFetchRequest)
-      let fetchedLaunches = try taskContext.fetch(launchesFetchRequest)
-      
-      guard !fetchedLinks.isEmpty,
-            !fetchedLaunches.isEmpty
-      else { continue }
-      
-      fetchedLinks[0].launch = fetchedLaunches[0]
-      fetchedLaunches[0].addToSpaceXList(list)
-    }
-    
-    try taskContext.save()
+    try await taskContext.perform {
+      for relationship in links {
+        guard let link = relationship.relatedObject as? SpaceXLinksJSON else { continue }
         
+        let linksFetchRequest = SpaceXLinks.fetchRequest()
+        linksFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [link.id])
+        
+        let launchesFetchRequest = SpaceXLaunch.fetchRequest()
+        launchesFetchRequest.predicate = NSPredicate(format: "id == %@", argumentArray: [relationship.launchId])
+        
+        let fetchedLinks = try taskContext.fetch(linksFetchRequest)
+        let fetchedLaunches = try taskContext.fetch(launchesFetchRequest)
+        
+        guard !fetchedLinks.isEmpty,
+              !fetchedLaunches.isEmpty
+        else { continue }
+        
+        fetchedLinks[0].launch = fetchedLaunches[0]
+        fetchedLaunches[0].addToSpaceXList(list)
+      }
+      
+      try taskContext.save()
+    }
   }
   
   private func createBatchInsertLaunchRequest(from launchCollection: [SpaceXLaunchJSON]) -> NSBatchInsertRequest {

@@ -6,7 +6,7 @@
         <attribute name="launchPad" optional="YES" attributeType="String"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
-        <relationship name="list" maxCount="1" deletionRule="Nullify" destinationEntity="RocketLaunchList" inverseName="launches" inverseEntity="RocketLaunchList"/>
+        <relationship name="list" toMany="YES" deletionRule="Nullify" destinationEntity="RocketLaunchList" inverseName="launches" inverseEntity="RocketLaunchList"/>
         <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RocketLaunchTag" inverseName="taggedLaunches" inverseEntity="RocketLaunchTag"/>
     </entity>
     <entity name="RocketLaunchList" representedClassName="RocketLaunchList" syncable="YES">
