@@ -359,4 +359,10 @@ struct PersistenceController {
     
     return batchInsertRequest
   }
+  
+  static func deleteList(list: RocketLaunchList) throws {
+    let taskContext = shared.container.viewContext
+    taskContext.delete(list)
+    try taskContext.save()
+  }
 }
