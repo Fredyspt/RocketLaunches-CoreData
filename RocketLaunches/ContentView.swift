@@ -47,11 +47,27 @@ struct ContentView: View {
                 action: { self.isShowingListModal.toggle() },
                 label: { Image(systemName: "plus") }
               )
+              
+              Button(
+                action: {
+                  Task {
+                    try await PersistenceController.fetchSpaceXLaunches()
+                  }
+                },
+                label: { Image(systemName: "arrow.clockwise") }
+              )
             }
             .sheet(isPresented: $isShowingListModal) {
               ListCreateView()
             }
         )
+    }
+    .task {
+      do {
+        try await PersistenceController.createSpaceXLaunchLists()
+      } catch {
+        print("Error getting lunch lists \(error)")
+      }
     }
   }
 }

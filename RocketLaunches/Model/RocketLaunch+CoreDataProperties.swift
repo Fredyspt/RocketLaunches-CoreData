@@ -38,7 +38,7 @@ extension RocketLaunch {
   @NSManaged public var name: String
   @NSManaged public var launchDate: Date
   @NSManaged public var isViewed: Bool
-  @NSManaged public var launchPad: String?
+  @NSManaged public var launchpad: String?
   @NSManaged public var notes: String?
   @NSManaged public var tags: Set<RocketLaunchTag>
   @NSManaged public var list: Set<RocketLaunchList>
@@ -59,7 +59,7 @@ extension RocketLaunch {
     launch.tags = tags
     launch.isViewed = isViewed
     launch.launchDate = launchDate
-    launch.launchPad = launchPad
+    launch.launchpad = launchPad
     launch.addToList(list)
     
     do {

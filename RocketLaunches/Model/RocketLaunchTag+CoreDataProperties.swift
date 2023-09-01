@@ -42,14 +42,14 @@ extension RocketLaunchTag {
   }
   
   @NSManaged public var title: String?
-  @NSManaged public var taggedLaunches: Set<RocketLaunch>
+  @NSManaged public var launches: Set<RocketLaunch>
   
   @objc var launchCount: Int {
     // this method takes a keypath to an attribute on the same entity
     // and informs core data through key-value observing that the taggedLaunches
     // property is about to be accessed.
     willAccessValue(forKey: "taggedLaunches")
-    let count = taggedLaunches.count
+    let count = launches.count
     didAccessValue(forKey: "taggedLaunches")
     return count
   }

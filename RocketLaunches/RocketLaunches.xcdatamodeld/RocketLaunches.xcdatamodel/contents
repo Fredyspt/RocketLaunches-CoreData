@@ -32,7 +32,7 @@
         <attribute name="ships" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromDataTransformer" customClassName="[String]"/>
         <relationship name="launch" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SpaceXLaunch" inverseName="fairings" inverseEntity="SpaceXLaunch"/>
     </entity>
-    <entity name="SpaceXLaunch" representedClassName="SpaceXLaunch" syncable="YES" codeGenerationType="class">
+    <entity name="SpaceXLaunch" representedClassName="SpaceXLaunch" parentEntity="RocketLaunch" syncable="YES" codeGenerationType="class">
         <attribute name="autoUpdate" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="capsules" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromDataTransformer" customClassName="[String]"/>
         <attribute name="crew" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromDataTransformer" customClassName="[[String:String]]"/>
@@ -43,7 +43,6 @@
         <attribute name="details" optional="YES" attributeType="String"/>
         <attribute name="flightNumber" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="String"/>
-        <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="net" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="payloads" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromDataTransformer" customClassName="[String]"/>
         <attribute name="rocket" optional="YES" attributeType="String"/>

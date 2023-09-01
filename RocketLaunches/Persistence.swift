@@ -70,7 +70,7 @@ struct PersistenceController {
     
         launchLinks.presskit = nil
         launchLinks.webcast = "https://youtu.be/nnVOfKOzXHE"
-        launchLinks.youtubeId = "nnVOfKOzXHE"
+        launchLinks.youtubeid = "nnVOfKOzXHE"
         launchLinks.article = nil
         launchLinks.wikipedia = "https://en.wikipedia.org/wiki/Starlink"
     

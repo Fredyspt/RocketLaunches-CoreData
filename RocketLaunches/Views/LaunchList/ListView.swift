@@ -39,13 +39,30 @@ struct ListView: View {
   @FetchRequest(sortDescriptors: [])
   var launchLists: FetchedResults<RocketLaunchList>
   
+  @FetchRequest(sortDescriptors: [], animation: .default)
+  var spaceXLaunchLists: FetchedResults<SpaceXLaunchList>
+  
   var body: some View {
     Form {
-      ForEach(launchLists, id: \.self) { launchList in
-        NavigationLink(destination: LaunchesView(launchList: launchList)) {
-          CircularImageView(color: .red)
-          Text(launchList.title ?? "")
+      Section("SpaceX Launch Lists") {
+        ForEach(spaceXLaunchLists, id: \.title) { launchList in
+          NavigationLink(
+            destination: SpaceXLaunchesView(launchList: launchList)
+          ) {
+            CircularImageView(color: Color(.red))
+            // swiftlint:disable:next force_unwrapping
+            Text(launchList.title!)
+          }
         }
+      }
+      
+      Section("Manual Launch Lists") {
+        ForEach(launchLists, id: \.self) { launchList in
+          NavigationLink(destination: LaunchesView(launchList: launchList)) {
+            CircularImageView(color: .red)
+            Text(launchList.title ?? "")
+          }
+        }        
       }
     }
   }
